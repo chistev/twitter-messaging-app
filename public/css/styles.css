@@ -1,0 +1,9 @@
+/* Logout */
+
+.sign-in-btn {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sign-in-btn:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+}

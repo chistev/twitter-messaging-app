@@ -114,6 +114,23 @@ app.get('/auth/google/callback',
 app.get('/select-username', (req, res) => {
   res.render('auth/select-username', { title: 'Logout', body: '' });
 });
+
+// Route to check username availability
+app.get('/check-username', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      res.json({ available: false });
+    } else {
+      res.json({ available: true });
+    }
+  } catch (error) {
+    console.error('Error checking username:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

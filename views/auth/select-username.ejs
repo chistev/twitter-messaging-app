@@ -1,15 +1,95 @@
 <%- include('../base', { title: 'Select Username', body: body }) %>
 
 <body style="background-color: #242d34;" class="d-flex flex-column align-items-center justify-content-center">
-  <div class="card mt-5" style="background-color: #000000; color: white; padding: 20px; border-radius: 10px; width: 600px; text-align: center;">
-    <h2 style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 31px; line-height: 36px; color: #e7e9ea;">What should we call you?</h2>
-    <h3 class="mb-4" style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 400; font-size: 15px; line-height: 20px; color: #71767b;">Your @username is unique. You can't change it later.</h3>
-    <form action="/select-username" method="POST">
-        <div class="form-group" style="margin-bottom: 20px; position: relative; width: 80%; margin: 0 auto;">
+    <div class="card mt-5" style="background-color: #000000; color: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 600px; text-align: center;">
+      <h2 style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 31px; line-height: 36px; color: #e7e9ea;">What should we call you?</h2>
+      <h3 class="mb-4" style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 400; font-size: 15px; line-height: 20px; color: #71767b;">Your @username is unique. You can't change it later.</h3>
+      <form id="username-form" action="/select-username" method="POST">
+        <div class="form-group position-relative mx-auto" style="margin-bottom: 20px; width: 80%;">
           <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: white;">@</span>
-          <input type="text" id="username" name="username" required placeholder="Username" style="width: 100%; padding: 10px 10px 10px 25px; border-radius: 5px; border: 1px solid #ccc; background-color: transparent; color: white;">
+          <input type="text" id="username" name="username" required placeholder="Username" style="width: 100%; padding: 10px 10px 10px 25px; border-radius: 5px; border: 1px solid #ccc; background-color: transparent; color: white;">   
         </div>
-        <button class="submit-button mt-5" type="submit">Next</button>
+        <div id="username-error" class="error-message" style="color: red; font-size: 12px; display: none;"></div>
+        <div id="username-available" class="available-message" style="color: green; font-size: 12px; display: none;"></div>
+        <button class="submit-button mt-5" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Next</button>
       </form>
-  </div>
+    </div>
+
+    <script>
+        const usernameField = document.getElementById('username');
+        const errorElement = document.getElementById('username-error');
+        const availableElement = document.getElementById('username-available');
+        const form = document.getElementById('username-form');
+        let typingTimer;
+        const doneTypingInterval = 500; // Time in milliseconds (0.5 seconds)
+
+        // Function to check username availability
+        function checkUsernameAvailability(username) {
+          fetch(`/check-username?username=${username}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.available) {
+                availableElement.textContent = 'Username available!';
+                availableElement.style.display = 'block';
+                errorElement.style.display = 'none';
+                usernameField.classList.remove('input-error');
+                form.querySelector('button[type="submit"]').disabled = false;
+                form.querySelector('button[type="submit"]').style.opacity = 1;
+                form.querySelector('button[type="submit"]').style.cursor = 'pointer';
+              } else {
+                errorElement.textContent = 'This username is already taken.';
+                errorElement.style.display = 'block';
+                availableElement.style.display = 'none';
+                usernameField.classList.add('input-error');
+                form.querySelector('button[type="submit"]').disabled = true;
+                form.querySelector('button[type="submit"]').style.opacity = 0.5;
+                form.querySelector('button[type="submit"]').style.cursor = 'not-allowed';
+              }
+            })
+            .catch(error => {
+              console.error('Error checking username availability:', error);
+            });
+        }
+
+        // Event listener for input changes
+        usernameField.addEventListener('input', () => {
+          const username = usernameField.value.trim();
+          let errorMessage = '';
+
+          // Check for spaces
+          if (username.includes(' ')) {
+            errorMessage += 'Your username cannot contain spaces. ';
+          }
+
+          // Check for characters other than letters, numbers, and underscore
+          if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            errorMessage += 'Your username can only contain letters, numbers, and \'_\'. ';
+          }
+
+          // Check if username consists only of numbers
+          if (/^\d+$/.test(username)) {
+            errorMessage += 'Include a non-number character. ';
+          }
+
+          // Check if username is at least 5 characters long
+          if (username.length < 5) {
+            errorMessage += 'Your username must be at least 5 characters long. ';
+          }
+
+          // Display error message and apply/remove input-error class based on conditions
+          if (errorMessage) {
+            errorElement.textContent = errorMessage;
+            usernameField.classList.add('input-error');
+            errorElement.style.display = 'block';
+            availableElement.style.display = 'none';
+            form.querySelector('button[type="submit"]').disabled = true;
+            form.querySelector('button[type="submit"]').style.opacity = 0.5;
+            form.querySelector('button[type="submit"]').style.cursor = 'not-allowed';
+          } else {
+            usernameField.classList.remove('input-error');
+            errorElement.style.display = 'none';
+            checkUsernameAvailability(username);
+          }
+        });
+    </script>
 </body>

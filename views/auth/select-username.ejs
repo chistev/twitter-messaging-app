@@ -11,6 +11,8 @@
         </div>
         <div id="username-error" class="error-message" style="color: red; font-size: 12px; display: none;"></div>
         <div id="username-available" class="available-message" style="color: green; font-size: 12px; display: none;"></div>
+        <!-- Hidden input field for username -->
+        <input type="hidden" id="hidden-username" name="hidden-username">
         <button class="submit-button mt-5" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Next</button>
       </form>
     </div>
@@ -22,7 +24,7 @@
         const form = document.getElementById('username-form');
         let typingTimer;
         const doneTypingInterval = 500; // Time in milliseconds (0.5 seconds)
-
+      
         // Function to check username availability
         function checkUsernameAvailability(username) {
           fetch(`/check-username?username=${username}`)
@@ -50,32 +52,32 @@
               console.error('Error checking username availability:', error);
             });
         }
-
+      
         // Event listener for input changes
         usernameField.addEventListener('input', () => {
           const username = usernameField.value.trim();
           let errorMessage = '';
-
+      
           // Check for spaces
           if (username.includes(' ')) {
             errorMessage += 'Your username cannot contain spaces. ';
           }
-
+      
           // Check for characters other than letters, numbers, and underscore
           if (!/^[a-zA-Z0-9_]+$/.test(username)) {
             errorMessage += 'Your username can only contain letters, numbers, and \'_\'. ';
           }
-
+      
           // Check if username consists only of numbers
           if (/^\d+$/.test(username)) {
             errorMessage += 'Include a non-number character. ';
           }
-
+      
           // Check if username is at least 5 characters long
           if (username.length < 5) {
             errorMessage += 'Your username must be at least 5 characters long. ';
           }
-
+      
           // Display error message and apply/remove input-error class based on conditions
           if (errorMessage) {
             errorElement.textContent = errorMessage;
@@ -91,5 +93,45 @@
             checkUsernameAvailability(username);
           }
         });
-    </script>
+      
+        // Event listener for form submission
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault(); // Prevent default form submission
+      
+          const username = usernameField.value.trim();
+          document.getElementById('hidden-username').value = username;
+      
+          try {
+            const response = await fetch(`/select-username`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username })
+            });
+      
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+      
+            const data = await response.json();
+            if (data.error) {
+              // Handle server-side validation error
+              errorElement.textContent = data.error;
+              errorElement.style.display = 'block';
+              availableElement.style.display = 'none';
+              usernameField.classList.add('input-error');
+              form.querySelector('button[type="submit"]').disabled = true;
+              form.querySelector('button[type="submit"]').style.opacity = 0.5;
+              form.querySelector('button[type="submit"]').style.cursor = 'not-allowed';
+            } else {
+              // Success case, redirect or proceed accordingly
+              window.location.href = '/'; // Example redirect
+            }
+          } catch (error) {
+            console.error('Error submitting form:', error);
+          }
+        });
+      </script>
+      
 </body>

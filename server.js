@@ -131,6 +131,42 @@ app.get('/check-username', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+app.post('/select-username', async (req, res) => {
+  const { username } = req.body;
+
+  // Perform server-side validation
+  let errors = [];
+  if (username.length < 5) {
+    errors.push('Your username must be at least 5 characters long.');
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    errors.push('Your username can only contain letters, numbers, and \'_\'.');
+  }
+
+  // Check if username already exists in the database
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    errors.push('This username is already taken.');
+  }
+
+  if (errors.length > 0) {
+    // Return errors as JSON response
+    return res.status(400).json({ error: errors.join(' ') });
+  }
+
+  // Save the username or perform other actions as needed
+  // For example, update user record with username
+  const userId = req.user._id; // Assuming user is authenticated and req.user is available
+  try {
+    await User.findByIdAndUpdate(userId, { username });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

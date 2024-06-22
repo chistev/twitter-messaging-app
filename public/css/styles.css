@@ -7,3 +7,20 @@
 .sign-in-btn:hover {
     background-color: rgba(29, 155, 240, 0.1);
 }
+
+/* Select Username */
+
+.submit-button {
+    background-color: transparent;
+    color: white;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 50px;
+    cursor: pointer;
+    width: 80%;
+    transition: background-color 0.3s ease;
+  }
+
+  .submit-button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Slight shade of the text color */
+  }

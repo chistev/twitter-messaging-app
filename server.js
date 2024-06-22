@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(error => console.error('Error connecting to MongoDB:', error));
   
 // Define User model
-const User = mongoose.model('User', { googleId: String, email: String });
+const User = mongoose.model('User', { googleId: String, email: String, username: String });
 
 const app = express();
 const server = createServer(app);
@@ -103,11 +103,17 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    // Successful authentication, redirect home.
-    res.redirect('/');
+    if (!req.user.username) {
+      res.redirect('/select-username');
+    } else {
+      res.redirect('/');
+    }
   }
 );
 
+app.get('/select-username', (req, res) => {
+  res.render('auth/select-username', { title: 'Logout', body: '' });
+});
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

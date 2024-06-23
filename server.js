@@ -47,7 +47,7 @@ passport.use(new GoogleStrategy({
 },
 (accessToken, refreshToken, profile, done) => {
   // Handle Google authentication callback
-  // Check if user exists in database based on email
+  // Check if user exists in database based on googleId
   User.findOne({ googleId: profile.id })
     .then(existingUser => {
       if (existingUser) {
@@ -55,20 +55,12 @@ passport.use(new GoogleStrategy({
         // User exists, proceed with authentication
         return done(null, existingUser);
       } else {
-        // Create a new user if not found
-        const newUser = new User({
+        // Store user information in session and redirect to select-username page
+        const tempUser = {
           googleId: profile.id,
-          email: profile.emails[0].value // Adjust as per your profile structure
-        });
-        newUser.save()
-          .then(user => {
-            console.log('New user created:', user);
-            return done(null, user);
-          })
-          .catch(err => {
-            console.error('Error creating new user:', err);
-            return done(err);
-          });
+          email: profile.emails[0].value
+        };
+        return done(null, tempUser);
       }
     })
     .catch(err => {
@@ -79,17 +71,19 @@ passport.use(new GoogleStrategy({
 ));
 
 passport.serializeUser((user, done) => {
-  done(null, user.id); // Serialize user by ID
+  done(null, user);
 });
 
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then(user => {
-      done(null, user);
-    })
-    .catch(err => {
-      done(err);
-    });
+passport.deserializeUser((obj, done) => {
+  if (obj._id) {
+    // User is already in the database
+    User.findById(obj._id)
+      .then(user => done(null, user))
+      .catch(err => done(err));
+  } else {
+    // User is not yet in the database
+    done(null, obj);
+  }
 });
 
 
@@ -100,19 +94,27 @@ app.get('/logout', (req, res) => {
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
+// Authentication callback
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    if (!req.user.username) {
-      res.redirect('/select-username');
+    if (req.user) {
+      if (req.user.username) {
+        // User exists, redirect to homepage
+        res.redirect('/');
+      } else {
+        // New user, redirect to select-username page
+        res.redirect('/select-username');
+      }
     } else {
-      res.redirect('/');
+      // Handle authentication failure
+      res.redirect('/login');
     }
   }
 );
 
 app.get('/select-username', (req, res) => {
-  res.render('auth/select-username', { title: 'Logout', body: '' });
+  res.render('auth/select-username', { title: 'Select Username', body: '' });
 });
 
 // Route to check username availability
@@ -133,6 +135,13 @@ app.get('/check-username', async (req, res) => {
 });
 
 app.post('/select-username', async (req, res) => {
+  const tempUser = req.user; // Get the temporary user information from the session
+
+  // If there's no session data, redirect to the logout page
+  if (!tempUser) {
+    return res.redirect('/logout');
+  }
+
   const { username } = req.body;
 
   // Perform server-side validation
@@ -155,14 +164,24 @@ app.post('/select-username', async (req, res) => {
     return res.status(400).json({ error: errors.join(' ') });
   }
 
-  // Save the username or perform other actions as needed
-  // For example, update user record with username
-  const userId = req.user._id; // Assuming user is authenticated and req.user is available
+  // Create a new user with the provided username
+  const newUser = new User({
+    googleId: tempUser.googleId,
+    email: tempUser.email,
+    username
+  });
+  console.log(newUser)
   try {
-    await User.findByIdAndUpdate(userId, { username });
-    res.json({ success: true });
+    await newUser.save();
+    req.login(newUser, function(err) {
+      if (err) {
+        console.error('Error logging in newly created user:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json({ success: true });
+    });
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error('Error creating new user:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

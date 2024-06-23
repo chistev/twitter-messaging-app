@@ -4,7 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const passport = require('passport');
 const session = require('express-session');
-const csrf = require('csrf');
+const { csrfMiddleware, csrfVerifyMiddleware } = require('./middleware/csrfMiddleware');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -41,7 +41,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Initialize csrf middleware
-const tokens = new csrf();
+app.use(csrfMiddleware);
 
 // Make CSRF token available in views
 app.use((req, res, next) => {
@@ -50,9 +50,11 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/', require('./controllers/authControllers/authRoutes'));
-app.use('/', require('./controllers/authControllers/usernameRoutes'));
+const authRoutes = require('./controllers/authControllers/authRoutes');
+const usernameRoutes = require('./controllers/authControllers/usernameRoutes');
 
+app.use('/', authRoutes);
+app.use('/', csrfVerifyMiddleware, usernameRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

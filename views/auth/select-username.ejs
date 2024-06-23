@@ -5,6 +5,7 @@
       <h2 style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 31px; line-height: 36px; color: #e7e9ea;">What should we call you?</h2>
       <h3 class="mb-4" style="font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 400; font-size: 15px; line-height: 20px; color: #71767b;">Your @username is unique. You can't change it later.</h3>
       <form id="username-form" action="/select-username" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group position-relative mx-auto" style="margin-bottom: 20px; width: 80%;">
           <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: white;">@</span>
           <input type="text" id="username" name="username" required placeholder="Username" style="width: 100%; padding: 10px 10px 10px 25px; border-radius: 5px; border: 1px solid #ccc; background-color: transparent; color: white;">   

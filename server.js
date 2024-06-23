@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const passport = require('passport');
 const session = require('express-session');
+const csrf = require('csrf');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -38,6 +39,15 @@ app.use(session({
 require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Initialize csrf middleware
+const tokens = new csrf();
+
+// Make CSRF token available in views
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Routes
 app.use('/', require('./controllers/authControllers/authRoutes'));

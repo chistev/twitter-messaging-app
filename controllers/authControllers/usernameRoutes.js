@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../../models/User')
+const checkNewUser = require('../../middleware/checkNewUser');
 
 // Username routes
-router.get('/select-username', (req, res) => {
+router.get('/select-username', checkNewUser, (req, res) => {
   res.render('auth/select-username', { title: 'Select Username', body: '' });
 });
 
@@ -68,6 +69,8 @@ router.post('/select-username', async (req, res) => {
           console.error('Error logging in newly created user:', err);
           return res.status(500).json({ error: 'Server error' });
         }
+        // Clear the temporary user data from the session
+        req.session.passport.user = newUser._id;
         res.json({ success: true });
       });
     } catch (error) {

@@ -7,6 +7,10 @@ router.get('/logout', (req, res) => {
   res.render('auth/logout', { title: 'Logout', body: '' });
 });
 
+router.get('/signin', (req, res) => {
+  res.render('auth/signin', { title: 'Signin', body: '' });
+});
+
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',

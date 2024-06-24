@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 const passport = require('passport');
 const session = require('express-session');
 const { csrfMiddleware, csrfVerifyMiddleware } = require('./middleware/csrfMiddleware');
+const initializePassport = require('./config/passport');
+
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -14,6 +17,9 @@ const connectDB = require('./config/mongoose');
 connectDB();
 
 const app = express();
+
+// Initialize Passport
+initializePassport(passport);
 const server = createServer(app);
 
 // EJS setup
@@ -26,7 +32,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(passport.initialize());
 // Configure express-session middleware
 app.use(session({
   secret: process.env.SECRET, 
@@ -36,12 +41,11 @@ app.use(session({
 }));
 
 // Passport configuration
-require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Initialize csrf middleware
-app.use(csrfMiddleware);
+app.use(csrfMiddleware); 
 
 // Make CSRF token available in views
 app.use((req, res, next) => {
@@ -54,7 +58,7 @@ const authRoutes = require('./controllers/authControllers/authRoutes');
 const usernameRoutes = require('./controllers/authControllers/usernameRoutes');
 
 app.use('/', authRoutes);
-app.use('/', csrfVerifyMiddleware, usernameRoutes);
+app.use('/', usernameRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

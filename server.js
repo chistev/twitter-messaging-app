@@ -60,6 +60,11 @@ const usernameRoutes = require('./controllers/authControllers/usernameRoutes');
 app.use('/', authRoutes);
 app.use('/', usernameRoutes);
 
+app.get('/messages', (req, res) => {
+  res.render('messages', { title: 'Select Username', body: '' });
+});
+
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

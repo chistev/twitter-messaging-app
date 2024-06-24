@@ -28,3 +28,10 @@
   .input-error {
     border-color: #f4212e !important;
   }
+
+  /* Messages */
+
+  .border-right {
+    border-right: 1px solid #2f3336;
+    border-left: 1px solid #2f3336;
+  }

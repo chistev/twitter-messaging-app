@@ -61,7 +61,11 @@ app.use('/', authRoutes);
 app.use('/', usernameRoutes);
 
 app.get('/messages', (req, res) => {
-  res.render('messages', { title: 'Select Username', body: '' });
+  res.render('messages', { title: 'Messages', body: '' });
+});
+
+app.get('/messages/settings', (req, res) => {
+  res.render('messages', { title: 'Settings', body: '' });
 });
 
 

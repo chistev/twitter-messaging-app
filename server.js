@@ -6,8 +6,7 @@ const passport = require('passport');
 const session = require('express-session');
 const { csrfMiddleware, csrfVerifyMiddleware } = require('./middleware/csrfMiddleware');
 const initializePassport = require('./config/passport');
-
-
+const User = require('./models/User');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -68,6 +67,15 @@ app.get('/messages/settings', (req, res) => {
   res.render('messages', { title: 'Settings', body: '' });
 });
 
+app.get('/api/users', async (req, res) => {
+  const { username } = req.query;
+  try {
+    const users = await User.find({ username: new RegExp(username, 'i') }).limit(10);
+    res.json(users);
+  } catch (error) {
+    res.status(500).send('Server Error');
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

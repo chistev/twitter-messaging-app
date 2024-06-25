@@ -36,11 +36,36 @@
     border-left: 1px solid #2f3336;
   }
 
-
   .form-control::placeholder {
     color: #e7e9ea;
     opacity: 1;
     font-weight: bold;
   }
 
-  
+  .direct-search-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #35363a;
+    border-radius: 25px;
+    padding: 5px 15px;
+    width: 100%;
+  }
+
+  .direct-search-input {
+    background: transparent;
+    border: none;
+    color: #e7e9ea;
+    flex-grow: 1;
+    outline: none;
+  }
+
+  .direct-search-input:focus{
+    background: transparent;
+    box-shadow: none;
+    color: #e7e9ea;;
+  }
+
+  .direct-search-input::placeholder {
+    color: #71767b;
+    font-weight: 100;
+  }

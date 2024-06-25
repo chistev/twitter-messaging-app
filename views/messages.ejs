@@ -27,6 +27,32 @@
             </div>
         </div>
     </div>
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content text-white" style="background-color: #000000;">
+      <div class="modal-header border-0 d-flex justify-content-between">
+        <div class="d-flex justify-content-center align-items-center">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div>
+                <h5 class="modal-title ms-5" id="messageModalLabel" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px; color: #ffffff;">New message</h5>
+            </div>
+        </div>
+            <div>
+                <button type="button" class="btn" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 15px; line-height: 20px; color: #0f1419; background-color: #787a7a; border-radius: 50px;" data-bs-dismiss="modal">Next</button>
+            </div>
+      </div>
+      <div class="modal-body">
+        <div class="input-group d-flex align-items-center">
+            <span class="input-group-text bg-transparent border-0 ">
+                <i class="bi bi-search search-icon mb-3" style="color: #ffffff;"></i>
+            </span>
+            <input type="text" class="form-control mb-3 search-input" placeholder="Search people" style="background-color: transparent; border: none; box-shadow: none; color: #ffffff; caret-color: #ffffff; opacity: 1; /* Firefox */ color: #e7e9ea;">
+        </div>
+        <hr>
+      </div>
+    </div>
+  </div>
+</div>
 
     <script>
         document.getElementById('gear-icon').addEventListener('click', function() {
@@ -80,4 +106,63 @@
             document.getElementById('gear-icon').click();
         }
     </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+        const body = document.querySelector('body');
+    
+        // Function to change background color
+        function changeBackgroundColor(color) {
+            body.style.backgroundColor = color;
+        }
+    
+        // Show modal and change background color
+        document.querySelector('.bi-envelope-at').addEventListener('click', function() {
+            changeBackgroundColor('#242d34'); // Change background color
+            modal.show();
+        });
+    
+        // Hide modal and revert background color
+        modal._element.addEventListener('hidden.bs.modal', function() {
+            changeBackgroundColor('#000000'); // Revert background color
+        });
+    
+        // Additional event listeners for buttons that open the modal
+        document.querySelectorAll('.btn').forEach(button => {
+            if (button.textContent.trim() === 'Write a message' || button.textContent.trim() === 'New message') {
+                button.addEventListener('click', function() {
+                    changeBackgroundColor('#242d34'); // Change background color
+                    modal.show();
+                });
+            }
+        });
+    });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('.search-input');
+        const searchIcon = document.querySelector('.search-icon');
+
+        console.log('Search Input:', searchInput);
+        console.log('Search Icon:', searchIcon);
+
+        if (searchInput && searchIcon) {
+            searchInput.addEventListener('focus', function () {
+                console.log('Input focused');
+                searchIcon.style.color = '#1677b8';
+            });
+
+            searchInput.addEventListener('blur', function () {
+                console.log('Input blurred');
+                searchIcon.style.color = '#ffffff'; 
+            });
+        } else {
+            console.error('Search input or icon not found');
+        }
+    });
+</script>
+    
 </body>
+

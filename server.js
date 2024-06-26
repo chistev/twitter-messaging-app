@@ -7,6 +7,7 @@ const session = require('express-session');
 const { csrfMiddleware, csrfVerifyMiddleware } = require('./middleware/csrfMiddleware');
 const initializePassport = require('./config/passport');
 const User = require('./models/User');
+const MongoStore = require('connect-mongo');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -35,7 +36,11 @@ app.use(express.json());
 app.use(session({
   secret: process.env.SECRET, 
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,  // Only save sessions that have been modified
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
   cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day in milliseconds
 }));
 

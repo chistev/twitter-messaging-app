@@ -67,11 +67,32 @@ app.use('/', usernameRoutes);
 // New route to save selected user
 app.post('/api/select-user', async (req, res) => {
   const { userId, selectedUserId } = req.body;
-  console.log("userId: " + userId + "SelectedUserID: " + selectedUserId)
+  console.log(`Received request to select user - userId: ${userId}, selectedUserId: ${selectedUserId}`);
+  
   try {
-    await User.findByIdAndUpdate(userId, { selectedUser: selectedUserId });
+    // Fetch the user to log the existing selected users
+    const user = await User.findById(userId);
+    if (user) {
+      console.log(`Existing selected users for user ${userId}:`, user.selectedUsers);
+    } else {
+      console.log(`User ${userId} not found`);
+      return res.status(404).send('User not found');
+    }
+
+    // Attempt to update the user
+    console.log(`Attempting to update user ${userId} to add selected user ${selectedUserId}`);
+    await User.findByIdAndUpdate(userId, { $addToSet: { selectedUsers: selectedUserId } }); // Updated to add to the selectedUsers array
+    
+    // Fetch the updated user to log the new selected users
+    const updatedUser = await User.findById(userId);
+    if (updatedUser) {
+      console.log(`Updated selected users for user ${userId}:`, updatedUser.selectedUsers);
+    }
+
+    console.log(`Successfully updated user ${userId} with selected user ${selectedUserId}`);
     res.status(200).json({ message: 'Selected user updated' });
   } catch (error) {
+    console.error(`Error updating user ${userId} with selected user ${selectedUserId}:`, error);
     res.status(500).send('Server Error');
   }
 });
@@ -84,7 +105,7 @@ app.get('/messages', async (req, res) => {
       return res.status(400).send('User not found');
     }
 
-    const user = await User.findById(req.user.id).populate('selectedUser');
+    const user = await User.findById(req.user.id).populate('selectedUsers'); // Updated to populate selectedUsers array
     if (!user) {
       console.error(`User with id ${req.user.id} not found`);
       return res.status(404).send('User not found');
@@ -92,7 +113,7 @@ app.get('/messages', async (req, res) => {
 
     res.render('messages', { 
       title: 'Messages', 
-      selectedUser: user.selectedUser,
+      selectedUsers: user.selectedUsers, // Updated to pass selectedUsers array
       body: '',
       user: user,
     });

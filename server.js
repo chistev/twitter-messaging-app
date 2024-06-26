@@ -108,10 +108,19 @@ app.get('/messages/settings', (req, res) => {
 
 app.get('/api/users', async (req, res) => {
   const { username } = req.query;
-  try {
-    const users = await User.find({ username: new RegExp(username, 'i') }).limit(10);
+
+  const currentUserUsername = req.user.username; 
+
+   try {
+    // Find users matching the query but exclude the current user
+    const users = await User.find({ 
+      username: new RegExp(username, 'i'), 
+      username: { $ne: currentUserUsername } // Exclude the current user's username
+    }).limit(10);
+
     res.json(users);
   } catch (error) {
+    console.error(error);
     res.status(500).send('Server Error');
   }
 });

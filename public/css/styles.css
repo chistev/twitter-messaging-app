@@ -69,3 +69,16 @@
     color: #71767b;
     font-weight: 100;
   }
+
+  .three-dots-icon-container{
+    cursor: pointer;
+  }
+  
+  .user-container .three-dots-icon-container {
+    display: none;
+  }
+  
+  .user-container:hover .three-dots-icon-container {
+    display: block;
+  }
+  

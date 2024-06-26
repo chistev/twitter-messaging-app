@@ -59,8 +59,42 @@ const usernameRoutes = require('./controllers/authControllers/usernameRoutes');
 app.use('/', authRoutes);
 app.use('/', usernameRoutes);
 
-app.get('/messages', (req, res) => {
-  res.render('messages', { title: 'Messages', body: '' });
+// New route to save selected user
+app.post('/api/select-user', async (req, res) => {
+  const { userId, selectedUserId } = req.body;
+  console.log("userId: " + userId + "SelectedUserID: " + selectedUserId)
+  try {
+    await User.findByIdAndUpdate(userId, { selectedUser: selectedUserId });
+    res.status(200).json({ message: 'Selected user updated' });
+  } catch (error) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// Get selected user and render the view
+app.get('/messages', async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      console.error('User not found in request');
+      return res.status(400).send('User not found');
+    }
+
+    const user = await User.findById(req.user.id).populate('selectedUser');
+    if (!user) {
+      console.error(`User with id ${req.user.id} not found`);
+      return res.status(404).send('User not found');
+    }
+
+    res.render('messages', { 
+      title: 'Messages', 
+      selectedUser: user.selectedUser,
+      body: '',
+      user: user,
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).send('Server Error');
+  }
 });
 
 app.get('/messages/settings', (req, res) => {

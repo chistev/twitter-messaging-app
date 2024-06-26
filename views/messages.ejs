@@ -312,5 +312,21 @@
     }
   });
   </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.user-container').forEach(function(container) {
+    container.addEventListener('click', function() {
+      const iconContainer = container.querySelector('.three-dots-icon-container');
+      if (iconContainer.style.display === 'block') {
+        iconContainer.style.display = 'none';
+      } else {
+        iconContainer.style.display = 'block';
+      }
+    });
+  });
+});
+
+  </script>
 </body>
 

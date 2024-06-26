@@ -129,14 +129,24 @@ app.get('/messages/settings', (req, res) => {
 
 app.get('/api/users', async (req, res) => {
   const { username } = req.query;
-
   const currentUserUsername = req.user.username; 
 
    try {
-    // Find users matching the query but exclude the current user
+    // Fetch the current user to get the selectedUsers array
+    const currentUser = await User.findOne({ username: currentUserUsername });
+
+    if (!currentUser) {
+      return res.status(404).send('Current user not found');
+    }
+
+    const selectedUserIds = currentUser.selectedUsers.map(user => user._id);
+    console.log('Selected users to exclude:', selectedUserIds);
+
+    // Find users matching the query but exclude the current user and selected users
     const users = await User.find({ 
       username: new RegExp(username, 'i'), 
-      username: { $ne: currentUserUsername } // Exclude the current user's username
+      username: { $ne: currentUserUsername }, // Exclude the current user's username
+      _id: { $nin: selectedUserIds } // Exclude already selected users
     }).limit(10);
 
     res.json(users);

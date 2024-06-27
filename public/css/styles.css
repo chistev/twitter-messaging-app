@@ -82,3 +82,26 @@
     display: block;
   }
   
+  .three-dots-custom-modal-dialog{
+    max-width: fit-content;
+    margin: auto;
+  }
+
+.custom-popover {
+    background-color: #202327;
+    color: #e7e9ea;
+    border-radius: 0.5rem;
+}
+
+.custom-popover .popover-arrow::before {
+    background-color: #202327;
+}
+
+.custom-popover .custom-popover-content {
+    color: #e7e9ea;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; 
+    font-weight: 700; 
+    font-size: 15px; 
+    line-height: 20px; 
+    color: #e7e9ea;
+}

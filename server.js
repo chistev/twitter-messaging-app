@@ -111,9 +111,16 @@ app.get('/messages', async (req, res) => {
       return res.status(404).send('User not found');
     }
 
+    const selectedUserId = req.query.user;
+    let selectedUser = null;
+    if (selectedUserId) {
+      selectedUser = await User.findById(selectedUserId);
+    }
+
     res.render('messages', { 
       title: 'Messages', 
       selectedUsers: user.selectedUsers, // Updated to pass selectedUsers array
+      selectedUser: selectedUser, // Pass the selected user if any
       body: '',
       user: user,
     });

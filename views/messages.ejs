@@ -382,25 +382,21 @@
       });
     });
   
+    // Function to hide all popovers
+    function hideAllPopovers() {
+      popoverList.forEach(function (popover) {
+        popover.hide();
+      });
+    }
+  
     // Hide all popovers when a new one is about to be shown
     document.querySelectorAll('.bi-three-dots').forEach(function (el) {
       el.addEventListener('show.bs.popover', function () {
-        popoverList.forEach(function (popover) {
-          popover.hide();
-        });
+        hideAllPopovers();
       });
     });
   
-    // Hide popovers when clicking outside
-    document.addEventListener('click', function (event) {
-      popoverList.forEach(function (popover) {
-        if (!event.target.closest('.popover') && !event.target.closest('.bi-three-dots')) {
-          popover.hide();
-        }
-      });
-    });
-  
-    // Handle delete button click
+    // Handle delete button click using event delegation
     document.addEventListener('click', async function (event) {
       if (event.target.matches('.text-danger') || event.target.closest('.text-danger')) {
         const deleteButton = event.target.matches('.text-danger') ? event.target : event.target.closest('.text-danger');
@@ -430,6 +426,9 @@
   
           // Update UI logic to remove the user visually
           userContainer.remove();
+  
+          // Hide associated popover
+          hideAllPopovers();
   
           // Check if selectedUsers is empty after deletion
           const selectedUsersContainer = document.getElementById('selected-users');
@@ -468,10 +467,19 @@
           console.error('Error deleting conversation:', error);
         }
       }
+  
+      // Handle click on "Write a message" button (assuming this is dynamically created)
+      if (event.target.matches('.btn.p-3')) {
+        // Trigger modal programmatically
+        var myModal = new bootstrap.Modal(document.getElementById('messageModal'), {
+          backdrop: 'false' // Disable backdrop
+        });
+        myModal.show();
+      }
     });
   });
   </script>
-    
+          
 <script>
   function selectUser(userId, username) {
   history.pushState({}, '', `/messages?user=${userId}`);

@@ -441,6 +441,7 @@
             // Ensure elements exist before manipulating styles
             const selectedUsersElem = document.getElementById('selected-users');
             const welcomeMessageElem = document.getElementById('welcome-message');
+            const contentColumnElem = document.getElementById('content-column');
   
             if (selectedUsersElem) {
               selectedUsersElem.style.display = 'none';
@@ -462,6 +463,18 @@
               selectedUsersContainer.insertAdjacentHTML('beforebegin', welcomeMessageHTML);
               console.log('Welcome message appended to DOM.');
             }
+
+            // Insert additional selection message HTML
+            contentColumnElem.innerHTML  = `
+              <div class="p-3 text-center">
+                <h3 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 800; font-size: 31px; line-height: 36px; color: #e7e9ea;">Select a message</h3>
+                <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 15px; line-height: 20px; color: #71767b;">Choose from your existing conversations, or start a new one.</p>
+                <button class="btn p-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 17px; line-height: 20px; color: #ffffff; background-color: #1d9bf0; border-radius: 50px;">New message</button>
+              </div>
+            `;
+            // Remove classes from content column
+            contentColumnElem.classList.add('align-items-center', 'justify-content-center');
+            console.log('Selection message set as content column inner HTML.');
           }
         } catch (error) {
           console.error('Error deleting conversation:', error);
@@ -477,6 +490,8 @@
         myModal.show();
       }
     });
+
+    
   });
   </script>
           

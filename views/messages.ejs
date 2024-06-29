@@ -475,6 +475,9 @@
             // Remove classes from content column
             contentColumnElem.classList.add('align-items-center', 'justify-content-center');
             console.log('Selection message set as content column inner HTML.');
+
+            // Change the URL to /messages
+            history.pushState({}, '', '/messages');
           }
         } catch (error) {
           console.error('Error deleting conversation:', error);

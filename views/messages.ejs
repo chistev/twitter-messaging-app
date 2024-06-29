@@ -381,7 +381,7 @@
         template: '<div class="popover custom-popover" role="tooltip"><div class="popover-arrow"></div><div class="popover-body"></div></div>'
       });
     });
-
+  
     // Hide all popovers when a new one is about to be shown
     document.querySelectorAll('.bi-three-dots').forEach(function (el) {
       el.addEventListener('show.bs.popover', function () {
@@ -390,7 +390,7 @@
         });
       });
     });
-
+  
     // Hide popovers when clicking outside
     document.addEventListener('click', function (event) {
       popoverList.forEach(function (popover) {
@@ -399,52 +399,79 @@
         }
       });
     });
-
-    document.addEventListener('click', function (event) {
-      console.log('Click detected:', event.target); // Log the click event
-
+  
+    // Handle delete button click
+    document.addEventListener('click', async function (event) {
       if (event.target.matches('.text-danger') || event.target.closest('.text-danger')) {
-        console.log('Delete button clicked'); // Log when the delete button is clicked
         const deleteButton = event.target.matches('.text-danger') ? event.target : event.target.closest('.text-danger');
         const popoverContent = deleteButton.closest('.custom-popover-content');
         
-        // Find the user-container by navigating up to the popover trigger (bi-three-dots) and then its parent
         const threeDotsIcon = document.querySelector(`[aria-describedby="${popoverContent.closest('.popover').id}"]`);
         const userContainer = threeDotsIcon.closest('.user-container');
-
+  
         if (!userContainer) {
           console.error('User container not found');
           return;
         }
-
+  
         const userId = userContainer.getAttribute('data-user-id');
-        console.log('User ID to remove:', userId); // Log the user ID
-
-        // Remove user from the page
-        userContainer.remove();
-        console.log('User container removed from page'); // Log after removing the user container
-
-        // Make a request to the server to remove the user from the database
-        fetch(`/remove-user/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
+        
+        try {
+          const response = await fetch(`/remove-user/${userId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to delete user');
           }
-        }).then(response => {
-          console.log('Server response status:', response.status); // Log the server response status
-          if (response.ok) {
-            console.log('User removed successfully');
-          } else {
-            console.error('Error removing user');
+  
+          // Update UI logic to remove the user visually
+          userContainer.remove();
+  
+          // Check if selectedUsers is empty after deletion
+          const selectedUsersContainer = document.getElementById('selected-users');
+          const selectedUsers = selectedUsersContainer.querySelectorAll('.user-container');
+          console.log('Selected users length:', selectedUsers.length);
+  
+          if (selectedUsers.length === 0) {
+            console.log('No selected users left. Showing welcome message.');
+  
+            // Ensure elements exist before manipulating styles
+            const selectedUsersElem = document.getElementById('selected-users');
+            const welcomeMessageElem = document.getElementById('welcome-message');
+  
+            if (selectedUsersElem) {
+              selectedUsersElem.style.display = 'none';
+            }
+            if (welcomeMessageElem) {
+              welcomeMessageElem.style.display = 'block';
+            } else {
+              // Insert welcome message HTML if it doesn't exist
+              const welcomeMessageHTML = `
+                <br id="break-tag">
+                <div id="welcome-message">
+                  <h4 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 800; font-size: 31px; line-height: 36px; color: #e7e9ea;">Welcome to your inbox!</h4>
+                  <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 400; font-size: 15px; line-height: 20px; color: #71767b;">Search for a user and have private conversations with them.</p>
+                  <button class="btn p-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 17px; line-height: 20px; color: #ffffff; background-color: #1d9bf0; border-radius: 50px;">Write a message</button>
+                </div>
+              `;
+              
+              // Insert welcome message HTML before the selected-users container
+              selectedUsersContainer.insertAdjacentHTML('beforebegin', welcomeMessageHTML);
+              console.log('Welcome message appended to DOM.');
+            }
           }
-        }).catch(error => {
-          console.error('Error:', error);
-        });
+        } catch (error) {
+          console.error('Error deleting conversation:', error);
+        }
       }
     });
   });
-</script>
-
+  </script>
+    
 <script>
   function selectUser(userId, username) {
   history.pushState({}, '', `/messages?user=${userId}`);

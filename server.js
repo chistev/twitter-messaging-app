@@ -163,6 +163,31 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.delete('/remove-user/:id', async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      console.error('User not found in request');
+      return res.status(400).send('User not found');
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      console.error(`User with id ${req.user.id} not found`);
+      return res.status(404).send('User not found');
+    }
+
+    const userIdToRemove = req.params.id;
+    user.selectedUsers = user.selectedUsers.filter(userId => userId.toString() !== userIdToRemove);
+
+    await user.save();
+
+    res.status(200).send('User removed successfully');
+  } catch (error) {
+    console.error('Error removing user:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

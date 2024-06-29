@@ -370,36 +370,79 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function () {
     var popoverTemplate = document.getElementById('popover-template').innerHTML;
     var popoverTriggerList = [].slice.call(document.querySelectorAll('.bi-three-dots'));
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl, {
-            content: popoverTemplate,
-            html: true,
-            placement: 'right',
-            template: '<div class="popover custom-popover" role="tooltip"><div class="popover-arrow"></div><div class="popover-body"></div></div>'
-        });
+      return new bootstrap.Popover(popoverTriggerEl, {
+        content: popoverTemplate,
+        html: true,
+        placement: 'right',
+        template: '<div class="popover custom-popover" role="tooltip"><div class="popover-arrow"></div><div class="popover-body"></div></div>'
+      });
     });
 
     // Hide all popovers when a new one is about to be shown
     document.querySelectorAll('.bi-three-dots').forEach(function (el) {
-        el.addEventListener('show.bs.popover', function () {
-            popoverList.forEach(function (popover) {
-                popover.hide();
-            });
+      el.addEventListener('show.bs.popover', function () {
+        popoverList.forEach(function (popover) {
+          popover.hide();
         });
+      });
     });
 
     // Hide popovers when clicking outside
     document.addEventListener('click', function (event) {
-        popoverList.forEach(function (popover) {
-            if (!event.target.closest('.popover') && !event.target.closest('.bi-three-dots')) {
-                popover.hide();
-            }
-        });
+      popoverList.forEach(function (popover) {
+        if (!event.target.closest('.popover') && !event.target.closest('.bi-three-dots')) {
+          popover.hide();
+        }
+      });
     });
-});
+
+    document.addEventListener('click', function (event) {
+      console.log('Click detected:', event.target); // Log the click event
+
+      if (event.target.matches('.text-danger') || event.target.closest('.text-danger')) {
+        console.log('Delete button clicked'); // Log when the delete button is clicked
+        const deleteButton = event.target.matches('.text-danger') ? event.target : event.target.closest('.text-danger');
+        const popoverContent = deleteButton.closest('.custom-popover-content');
+        
+        // Find the user-container by navigating up to the popover trigger (bi-three-dots) and then its parent
+        const threeDotsIcon = document.querySelector(`[aria-describedby="${popoverContent.closest('.popover').id}"]`);
+        const userContainer = threeDotsIcon.closest('.user-container');
+
+        if (!userContainer) {
+          console.error('User container not found');
+          return;
+        }
+
+        const userId = userContainer.getAttribute('data-user-id');
+        console.log('User ID to remove:', userId); // Log the user ID
+
+        // Remove user from the page
+        userContainer.remove();
+        console.log('User container removed from page'); // Log after removing the user container
+
+        // Make a request to the server to remove the user from the database
+        fetch(`/remove-user/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(response => {
+          console.log('Server response status:', response.status); // Log the server response status
+          if (response.ok) {
+            console.log('User removed successfully');
+          } else {
+            console.error('Error removing user');
+          }
+        }).catch(error => {
+          console.error('Error:', error);
+        });
+      }
+    });
+  });
 </script>
 
 <script>
@@ -446,8 +489,6 @@ window.addEventListener('load', () => {
     }
   });
 </script>
-
-
 
 </body>
 

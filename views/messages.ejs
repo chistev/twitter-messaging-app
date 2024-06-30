@@ -241,67 +241,49 @@
 </script>
     
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const searchInput = document.querySelector('.search-input');
-      const userResults = document.getElementById('user-results');
-      const welcomeMessage = document.getElementById('welcome-message');
-      const selectedUsersContainer = document.getElementById('selected-users'); // Updated: Container for selected users
-      const selectedUserName = document.getElementById('selected-user-name');
-      const breakTag = document.getElementById('break-tag');
-      const currentUserId = '<%= user.id %>'; // Assuming the current user's ID is available in the EJS template
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.querySelector('.search-input');
+    const userResults = document.getElementById('user-results');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const breakTag = document.getElementById('break-tag');
+    const contentColumn = document.getElementById('sidebar-container');
+    const currentUserId = '<%= user.id %>'; // Assuming the current user's ID is available in the EJS template
 
-      console.log('DOM fully loaded and parsed');
-      console.log('Elements:', {
-            searchInput,
-            userResults,
-            welcomeMessage,
-            selectedUsersContainer, // Updated: Logging selected users container
-            selectedUserName,
-            breakTag,
-            currentUserId
-        });
-  
-      searchInput.addEventListener('input', async function () {
-        const query = searchInput.value;
-        console.log('Search input:', query);
-        if (query.length > 0) {
-          const response = await fetch(`/api/users?username=${query}`);
-          const users = await response.json();
-          renderUsers(users);
-        } else {
-          userResults.innerHTML = '';
-        }
-      });
-  
-      function renderUsers(users) {
+    searchInput.addEventListener('input', async function () {
+      const query = searchInput.value;
+      if (query.length > 0) {
+        const response = await fetch(`/api/users?username=${query}`);
+        const users = await response.json();
+        renderUsers(users);
+      } else {
+        userResults.innerHTML = '';
+      }
+    });
+
+    function renderUsers(users) {
       userResults.innerHTML = users.map(user => `
         <div class="user-result d-flex align-items-center mb-3">
-          <a href="" class="me-3 user-link" data-username="${user.username}" data-user-id="${user._id}">
+          <a href="#" class="me-3 user-link" data-username="${user.username}" data-user-id="${user._id}">
             <img src="" alt="${user.username}" class="rounded-circle" style="width: 40px; height: 40px;">
           </a>
-          <a href="" class="text-decoration-none text-white user-link" data-username="${user.username}" data-user-id="${user._id}">
+          <a href="#" class="text-decoration-none text-white user-link" data-username="${user.username}" data-user-id="${user._id}">
             <span class="d-block">${user.username}</span>
           </a>
         </div>
       `).join('');
-    
 
-    // Add event listeners to each user link
-    document.querySelectorAll('.user-link').forEach(link => {
-          link.addEventListener('click', function (event) {
-            event.preventDefault();
-            const username = event.currentTarget.getAttribute('data-username');
-            const userId = event.currentTarget.getAttribute('data-user-id');
-            console.log('User link clicked:', { username, userId });
-            saveSelectedUser(currentUserId, userId, username);
-          });
+      document.querySelectorAll('.user-link').forEach(link => {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          const username = event.currentTarget.getAttribute('data-username');
+          const userId = event.currentTarget.getAttribute('data-user-id');
+          saveSelectedUser(currentUserId, userId, username);
         });
-      }
-      
-      async function saveSelectedUser(currentUserId, selectedUserId, username) {
-        console.log('Saving selected user:', { currentUserId, selectedUserId, username });
+      });
+    }
 
-        try {
+    async function saveSelectedUser(currentUserId, selectedUserId, username) {
+      try {
         const response = await fetch('/api/select-user', {
           method: 'POST',
           headers: {
@@ -315,48 +297,57 @@
           throw new Error('Network response was not ok');
         }
 
-        console.log('Selected user saved successfully');
-
-
-
-        // Update the UI
-        const selectedUserElement = `
-          <div class="user-container d-flex align-items-center justify-content-between mb-3 p-2" style="background-color:#202327;">
-            <div class="d-flex align-items-center">
-              <div class="me-3">
-                <img src="" alt="${username}" class="rounded-circle" style="width: 40px; height: 40px;">
-              </div>
-              <div>
-                <span class="d-block" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 20px; color: #e7e9ea;">@${username}</span>
-              </div>
-            </div>
-            <div class="three-dots-icon-container">
-              <i class="bi bi-three-dots"></i>
-            </div>
-          </div>
-        `;
-
-        // Append the selected user to the container
-        selectedUsersContainer.insertAdjacentHTML('beforeend', selectedUserElement);
-
-        if (welcomeMessage) {
-          welcomeMessage.innerHTML = '';
-        }
-        if (selectedUserContainer) {
-          selectedUserContainer.style.display = 'block';
-        }
-        if (breakTag) {
-          breakTag.style.display = 'none';
-        }
-        if (selectedUserName) {
-          selectedUserName.textContent = "@" + username;
-        }
+        updateDOM(username);
       } catch (error) {
         console.error('Error saving selected user:', error);
       }
     }
+
+    function updateDOM(username) {
+      let selectedUsersContainer = document.getElementById('selected-users');
+      if (!selectedUsersContainer) {
+        selectedUsersContainer = document.createElement('div');
+        selectedUsersContainer.id = 'selected-users';
+        selectedUsersContainer.className = 'p-2';
+        selectedUsersContainer.style.display = 'block';
+        selectedUsersContainer.innerHTML = `
+          <div class="p-2 mb-1">
+            <div class="direct-search-input-container">
+              <i class="bi bi-search me-2"></i>
+              <input type="text" class="form-control direct-search-input" placeholder="Search Direct Messages">
+            </div>
+          </div>
+        `;
+        contentColumn.appendChild(selectedUsersContainer);
+      }
+
+      const selectedUserElement = `
+        <div class="user-container d-flex align-items-center justify-content-between mb-3 p-2" style="background-color:#202327;">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <img src="" alt="${username}" class="rounded-circle" style="width: 40px; height: 40px;">
+            </div>
+            <div>
+              <span class="d-block" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 20px; color: #e7e9ea;">@${username}</span>
+            </div>
+          </div>
+          <div class="three-dots-icon-container">
+            <i class="bi bi-three-dots" data-bs-toggle="popover"></i>
+          </div>
+        </div>
+      `;
+
+      selectedUsersContainer.insertAdjacentHTML('beforeend', selectedUserElement);
+
+      if (welcomeMessage) {
+        welcomeMessage.style.display = 'none';
+      }
+      if (breakTag) {
+        breakTag.style.display = 'none';
+      }
+    }
   });
-  </script>
+</script>
 
   <script type="text/template" id="popover-template">
     <div class="custom-popover-content">
